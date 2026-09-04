@@ -1,0 +1,160 @@
+import { ChevronDown } from "lucide-react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+
+const MENU_SELECT_OPEN_EVENT = "aitestlink:menu-select-open";
+const MENU_SELECT_CLOSE_ANIMATION_MS = 180;
+
+export interface MenuSelectOption<T extends string> {
+  value: T;
+  label: string;
+  description?: string;
+  renderLabel?: ReactNode;
+}
+
+interface MenuSelectProps<T extends string> {
+  value: T;
+  options: MenuSelectOption<T>[];
+  onChange: (value: T) => void;
+  disabled?: boolean;
+  placeholder?: string;
+  className?: string;
+  size?: "default" | "compact";
+  required?: boolean;
+  maxVisibleItems?: number;
+  placement?: "bottom" | "top";
+}
+
+export function MenuSelect<T extends string>({
+  value,
+  options,
+  onChange,
+  disabled = false,
+  placeholder = "请选择",
+  className = "",
+  size = "default",
+  required = false,
+  maxVisibleItems,
+  placement = "bottom",
+}: MenuSelectProps<T>) {
+  const [open, setOpen] = useState(false);
+  const [renderMenu, setRenderMenu] = useState(false);
+  const [closing, setClosing] = useState(false);
+  const [hoverStyle, setHoverStyle] = useState<CSSProperties | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const idRef = useRef(`menu-select-${Math.random().toString(36).slice(2)}`);
+  const closeTimerRef = useRef<number | null>(null);
+  const selected = options.find((option) => option.value === value);
+
+  useEffect(() => {
+    if (closeTimerRef.current !== null) {
+      window.clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+
+    if (open) {
+      setRenderMenu(true);
+      setClosing(false);
+      return;
+    }
+
+    if (renderMenu) {
+      setClosing(true);
+      setHoverStyle(null);
+      closeTimerRef.current = window.setTimeout(() => {
+        setRenderMenu(false);
+        setClosing(false);
+        closeTimerRef.current = null;
+      }, MENU_SELECT_CLOSE_ANIMATION_MS);
+    }
+
+    return () => {
+      if (closeTimerRef.current !== null) {
+        window.clearTimeout(closeTimerRef.current);
+        closeTimerRef.current = null;
+      }
+    };
+  }, [open, renderMenu]);
+
+  useEffect(() => {
+    const closeOtherMenus = (event: Event) => {
+      const currentId = (event as CustomEvent<string>).detail;
+      if (currentId !== idRef.current) setOpen(false);
+    };
+    window.addEventListener(MENU_SELECT_OPEN_EVENT, closeOtherMenus);
+    return () => window.removeEventListener(MENU_SELECT_OPEN_EVENT, closeOtherMenus);
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    const close = (event: MouseEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    // 捕获阶段监听，确保即便上层容器（如 Modal 的 dialog）调用 stopPropagation
+    // 阻止冒泡，点击外部关闭仍能生效。
+    window.addEventListener("click", close, true);
+    return () => window.removeEventListener("click", close, true);
+  }, [open]);
+
+  return (
+    <div className={`menu-select menu-select--${size} menu-select--${placement}${className ? ` ${className}` : ""}`} ref={rootRef}>
+      <button
+        className={open ? "menu-select__trigger menu-select__trigger--open" : "menu-select__trigger"}
+        type="button"
+        disabled={disabled}
+        aria-required={required}
+        onClick={(event) => {
+          event.stopPropagation();
+          if (!disabled) {
+            setOpen((current) => {
+              if (!current) {
+                window.dispatchEvent(new CustomEvent(MENU_SELECT_OPEN_EVENT, { detail: idRef.current }));
+              }
+              return !current;
+            });
+          }
+        }}
+      >
+        <span>{selected?.label || placeholder}</span>
+        <ChevronDown size={15} className={open ? "menu-select__chevron menu-select__chevron--open" : "menu-select__chevron"} />
+      </button>
+      {renderMenu ? (
+        <div
+          className={`menu-select__menu${placement === "top" ? " menu-select__menu--top" : ""}${closing ? " menu-select__menu--closing" : ""}`}
+          style={maxVisibleItems ? { "--menu-select-max-items": maxVisibleItems } as CSSProperties : undefined}
+          onClick={(event) => event.stopPropagation()}
+          onMouseLeave={() => setHoverStyle(null)}
+        >
+          <span
+            className={hoverStyle === null ? "menu-select__hover menu-select__hover--hidden" : "menu-select__hover"}
+            style={hoverStyle || undefined}
+          />
+          {options.map((option) => (
+            <button
+              key={option.value}
+              className={option.value === value ? "menu-select__item menu-select__item--active" : "menu-select__item"}
+              type="button"
+              onMouseEnter={(event) => {
+                const target = event.currentTarget;
+                setHoverStyle({
+                  transform: `translateY(${target.offsetTop - 6}px)`,
+                  height: target.offsetHeight,
+                });
+              }}
+              onClick={() => {
+                onChange(option.value);
+                setOpen(false);
+              }}
+            >
+              {option.renderLabel ?? (
+                <span className="menu-select__item-content">
+                  <span>{option.label}</span>
+                  {option.description ? <span className="menu-select__item-description">{option.description}</span> : null}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}

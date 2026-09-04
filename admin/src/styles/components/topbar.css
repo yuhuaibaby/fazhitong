@@ -1,0 +1,136 @@
+.main-area {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.topbar {
+  flex-shrink: 0;
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  padding: 14px;
+  position: relative;
+  z-index: 200;
+  isolation: isolate;
+}
+
+.topbar__eyebrow {
+  display: block;
+  color: var(--subtle);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.topbar h1 {
+  margin: 2px 0 0;
+  font-size: 21px;
+  line-height: 28px;
+}
+
+.topbar__tools {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.search-box {
+  width: min(360px, 36vw);
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--input-border);
+  border-radius: 9999px;
+  background: var(--input-bg-soft);
+  color: var(--muted);
+  padding: 0 12px;
+  box-shadow: var(--input-shadow);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
+}
+
+.search-box:hover {
+  border-color: var(--input-border-hover);
+  background: var(--surface);
+}
+
+.search-box:focus-within {
+  border-color: var(--input-border-focus);
+  background: var(--surface);
+  box-shadow: var(--input-shadow);
+}
+
+.search-box input {
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+}
+
+.content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 14px;
+}
+
+.page-stack {
+  display: grid;
+  gap: var(--sp-sm);
+}
+
+.page-stack--spaced {
+  padding-top: var(--sp-sm);
+}
+
+.page-stack--fill {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-stack--fill > * {
+  min-height: 0;
+}
+
+.page-stack--fill .work-panel {
+  flex: 1;
+  min-height: 0;
+}
+
+@media (max-width: 860px) {
+  .main-area {
+    height: auto;
+    overflow: visible;
+  }
+
+  .topbar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 14px 18px;
+  }
+
+  .topbar__tools {
+    width: 100%;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .content {
+    padding: 18px;
+    overflow-y: visible;
+  }
+}

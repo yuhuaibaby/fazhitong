@@ -1,0 +1,74 @@
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: auto;
+  min-height: 24px;
+  justify-self: start;
+  border-radius: 999px;
+  padding: 0 9px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 16px;
+}
+
+.status-pill--blue {
+  color: #5b21b6;
+  background: var(--blue-soft);
+}
+
+.status-pill--green {
+  color: var(--green);
+  background: var(--green-soft);
+}
+
+.status-pill--amber {
+  color: var(--amber);
+  background: var(--amber-soft);
+}
+
+.status-pill--red {
+  color: var(--red);
+  background: var(--red-soft);
+}
+
+.status-pill--slate {
+  color: #475569;
+  background: var(--slate-soft);
+}
+
+.status-pill--purple {
+  color: #7c3aed;
+  background: #f3e8ff;
+}
+
+.status-pill--blue.status-pill--loading {
+  animation: pill-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pill-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+
+
+/* text-button 内的 status-pill：悬浮时只显示外层背景 */
+.text-button:has(.status-pill) {
+  padding: 0 4px;
+}
+
+.text-button:has(.status-pill):hover .status-pill {
+  background: transparent;
+}
+
+/* 多选标签样式 */
+.multi-select-tag {
+  min-width: auto;
+  height: 22px;
+  padding: 0 6px 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 4px;
+  gap: 2px;
+}

@@ -1,0 +1,234 @@
+/* ─── Forms ─── */
+
+.form-stack {
+  display: grid;
+  gap: 16px;
+}
+
+.form-row {
+  display: grid;
+  gap: 12px;
+}
+
+.form-row--3 {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.form-row--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.form-check-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.form-check-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  width: fit-content;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.form-field {
+  position: relative;
+}
+
+.form-input--with-action {
+  padding-right: 42px;
+}
+
+.form-input-action {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  width: 24px;
+  height: 24px;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.form-input-action:hover {
+  background: var(--slate-soft);
+  color: var(--text);
+}
+
+.form-input-display {
+  display: flex;
+  align-items: center;
+  color: var(--muted);
+  background: var(--surface-soft);
+}
+
+.form-label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.form-label-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  width: fit-content;
+}
+
+.form-required {
+  color: var(--red, #dc2626);
+  font-size: 14px;
+  line-height: 1;
+}
+
+.form-input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l2);
+  background: var(--surface);
+  color: var(--text);
+  padding: 0 14px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  box-shadow: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.form-input {
+  appearance: auto;
+  background-image: none;
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: var(--subtle);
+  font-weight: 400;
+  opacity: 0.74;
+}
+
+.form-input:hover:not(:disabled),
+.form-textarea:hover:not(:disabled) {
+  border-color: rgba(91, 33, 182, 0.32);
+  background: var(--surface-soft);
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--blue);
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.form-textarea {
+  width: 100%;
+  min-height: 80px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l2);
+  background: var(--surface);
+  color: var(--text);
+  padding: 10px 14px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  resize: vertical;
+  box-shadow: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.form-input:disabled,
+.form-textarea:disabled {
+  cursor: not-allowed;
+  background-color: var(--surface-soft);
+  color: var(--muted);
+  border-color: rgba(15, 23, 42, 0.07);
+  box-shadow: none;
+  opacity: 0.76;
+}
+
+.field-hint {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.field-hint--warning {
+  color: #b45309;
+}
+
+.form-input[type="number"] {
+  appearance: textfield;
+  font-variant-numeric: tabular-nums;
+}
+
+.form-input[type="number"]::-webkit-outer-spin-button,
+.form-input[type="number"]::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+.input-with-icon .form-input {
+  padding-right: 42px;
+}
+
+.form-input--pill {
+  border-radius: var(--input-radius-pill);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 8px;
+}
+
+/* ─── Checkbox ─── */
+
+input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--blue);
+  cursor: pointer;
+}
+
+@media (max-width: 1180px) {
+  .form-row--3 {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row--2,
+  .form-check-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .form-row {
+    flex-direction: column;
+  }
+
+  .form-row--3 {
+    flex-direction: column;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+}

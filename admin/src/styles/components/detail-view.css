@@ -1,0 +1,168 @@
+/* ─── Detail Grid ─── */
+
+.detail-grid {
+  display: grid;
+  gap: 4px;
+}
+
+.detail-row {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 8px;
+  min-height: 36px;
+  align-items: center;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.72);
+  padding: 10px 4px;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.detail-row .status-pill {
+  width: fit-content;
+}
+
+.detail-row:last-child {
+  border-bottom: 0;
+}
+
+.detail-row--full {
+  grid-template-columns: 100px 1fr;
+}
+
+.reverse-requirements-form {
+  gap: 8px;
+}
+
+.reverse-requirements-form .detail-row {
+  border-bottom: 0;
+  padding: 6px 4px;
+}
+
+.reverse-requirements-form .form-textarea {
+  border-color: var(--line);
+  border-radius: var(--radius-l2);
+  background: var(--surface);
+  box-shadow: none;
+  font-weight: 400;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.reverse-requirements-form .form-textarea:hover:not(:disabled) {
+  border-color: rgba(91, 33, 182, 0.32);
+  background: var(--surface-soft);
+}
+
+.reverse-requirements-form .form-textarea:focus {
+  border-color: var(--blue);
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.reverse-requirements-form .form-textarea::placeholder,
+.reverse-requirements-form .menu-field-input::placeholder {
+  font-weight: 400;
+}
+
+.detail-label {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  padding-top: 2px;
+}
+
+.detail-pre {
+  margin: 0;
+  white-space: pre-wrap;
+  font: inherit;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--text);
+}
+
+/* ─── Detail Header ─── */
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.detail-header h2 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 28px;
+}
+
+.detail-header__title {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.detail-header__title h2 {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detail-header__actions {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  min-width: 0;
+  flex: 0 0 auto;
+  max-width: calc(100% - 180px);
+}
+
+.detail-header__actions .notif-wrapper {
+  flex: 0 0 auto;
+}
+
+.detail-header__task-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 0 0 auto;
+  padding: 5px 12px;
+  color: #7c3aed;
+  background: rgba(124, 58, 237, 0.12);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.detail-header__task-status span {
+  white-space: nowrap;
+}
+
+.detail-header .text-muted {
+  font-size: 13px;
+}
+
+@media (max-width: 860px) {
+  .detail-header {
+    flex-wrap: wrap;
+  }
+
+  .detail-header__title {
+    flex: 1 1 calc(100% - 120px);
+  }
+
+  .detail-header__actions {
+    margin-left: 0;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    flex: 1 1 100%;
+    justify-content: flex-end;
+  }
+
+  .detail-header__task-status {
+    flex: 0 1 auto;
+  }
+}

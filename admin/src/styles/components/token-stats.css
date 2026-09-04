@@ -1,0 +1,291 @@
+/* ─── Token Stats Page ─── */
+
+.content:has(.tks-page) {
+  overflow: hidden;
+}
+
+.tks-page {
+  display: grid;
+  gap: var(--sp-sm);
+  grid-template-rows: auto auto auto auto;
+  height: 100%;
+  min-height: 0;
+  overflow: auto;
+  padding-bottom: var(--sp-md);
+}
+
+.tks-page--refreshing {
+  opacity: 0.6;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+/* ── Toolbar ── */
+.tks-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-sm);
+}
+
+.tks-toolbar-left {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.tks-toolbar-title {
+  margin: 0;
+  font-size: 18px;
+  line-height: 24px;
+}
+
+.tks-toolbar-desc {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.tks-toolbar-right {
+  position: relative;
+  display: flex;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(91, 33, 182, 0.06);
+  flex-shrink: 0;
+}
+
+.tks-range-indicator {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc(25% - 1.5px);
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.tks-range-btn {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  padding: 6px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.tks-range-btn:hover {
+  color: var(--text);
+}
+
+.tks-range-btn--active {
+  color: var(--text);
+}
+
+/* ── Stat Cards：复用 dashboard dash-stat-card 模式 ── */
+.tks-stats {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--sp-sm);
+}
+
+.tks-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l2);
+  background: var(--surface);
+  padding: 18px;
+  min-height: 88px;
+}
+
+.tks-stat-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-l3);
+  flex-shrink: 0;
+}
+
+.tks-stat-body {
+  display: grid;
+  gap: 2px;
+}
+
+.tks-stat-label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.tks-stat-value {
+  font-size: 22px;
+  line-height: 28px;
+}
+
+.tks-stat-sub {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ── Charts Row ── */
+.tks-charts-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--sp-sm);
+}
+
+.tks-chart-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ── Chart interactions：与 dashboard 统一 ── */
+.tks-charts-row .recharts-sector {
+  cursor: pointer;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 180ms ease-out, filter 180ms ease-out, opacity 180ms ease-out;
+}
+
+.tks-charts-row .recharts-sector:hover {
+  filter: brightness(1.06) drop-shadow(0 5px 7px rgb(15 23 42 / 18%));
+  transform: scale(1.035);
+}
+
+.tks-charts-row:has(.recharts-sector:hover) .recharts-sector:not(:hover) {
+  opacity: 0.72;
+}
+
+.tks-charts-row .recharts-bar-rectangle .recharts-rectangle {
+  cursor: pointer;
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  transition: transform 180ms ease-out, filter 180ms ease-out, opacity 180ms ease-out;
+}
+
+.tks-charts-row .recharts-bar-rectangle .recharts-rectangle:hover {
+  filter: brightness(1.06) drop-shadow(0 5px 6px rgb(15 23 42 / 16%));
+}
+
+/* ── Legend：复用 dashboard dash-legend ── */
+.tks-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.tks-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.tks-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Skeleton ── */
+.tks-sk {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  border-radius: 999px;
+  background: linear-gradient(110deg, rgba(226, 232, 240, 0.58) 8%, rgba(248, 250, 252, 0.96) 18%, rgba(226, 232, 240, 0.58) 33%);
+  background-size: 240% 100%;
+  animation: tks-shimmer 1.15s ease-in-out infinite;
+}
+
+.tks-sk-icon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  border-radius: var(--radius-l3);
+}
+
+.tks-sk-line {
+  height: 12px;
+  width: 60px;
+}
+
+.tks-sk-line--lg {
+  width: 48px;
+  height: 24px;
+}
+
+.tks-sk-title {
+  width: 112px;
+  height: 16px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.tks-sk-area {
+  width: 100%;
+  height: 200px;
+  border-radius: 12px;
+}
+
+.tks-sk-donut {
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  background:
+    conic-gradient(from 30deg, rgba(91, 33, 182, 0.2), rgba(79, 109, 138, 0.15), rgba(226, 232, 240, 0.7), rgba(91, 33, 182, 0.2));
+  animation: tks-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes tks-shimmer {
+  0% { background-position: 120% 0; }
+  100% { background-position: -120% 0; }
+}
+
+@keyframes tks-pulse {
+  0%, 100% { opacity: 0.72; transform: scale(0.98); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+/* ── 模型调用明细表格 ── */
+.tks-model-table th,
+.tks-model-table td {
+  text-align: center;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+  .tks-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .tks-charts-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 860px) {
+  .tks-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .tks-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

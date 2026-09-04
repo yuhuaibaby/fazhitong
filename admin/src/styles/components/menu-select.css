@@ -1,0 +1,317 @@
+/* ─── Menu Select ─── */
+
+.menu-select {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.search-form__menu-select {
+  width: 160px;
+  flex-shrink: 0;
+}
+
+.filter-menu-select {
+  width: 160px;
+  flex-shrink: 0;
+}
+
+.pagination__menu-select {
+  width: 126px;
+  flex-shrink: 0;
+}
+
+.menu-select__trigger {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l2);
+  background: var(--surface);
+  color: var(--text);
+  padding: 8px 14px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  box-shadow: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.menu-select--compact .menu-select__trigger {
+  min-height: 34px;
+  border-radius: var(--input-radius);
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.menu-select__trigger > span {
+  min-width: 0;
+}
+
+.menu-select__trigger:hover:not(:disabled) {
+  border-color: rgba(91, 33, 182, 0.32);
+  background: var(--surface-soft);
+}
+
+.menu-select__trigger:focus-visible {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: none;
+}
+
+.menu-select__trigger--open {
+  background: rgba(91, 33, 182, 0.035);
+}
+
+.menu-select__trigger:disabled {
+  cursor: not-allowed;
+  color: var(--muted);
+  background: var(--surface-soft);
+}
+
+.menu-field-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 44px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l2);
+  background: var(--surface);
+  color: var(--text);
+  padding: 0 14px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  box-shadow: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.menu-field-input:hover:not(:disabled) {
+  border-color: rgba(91, 33, 182, 0.32);
+  background: var(--surface-soft);
+}
+
+.menu-field-input:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: none;
+}
+
+.menu-field-input[type="number"] {
+  appearance: textfield;
+  font-variant-numeric: tabular-nums;
+}
+
+.menu-field-input[type="number"]::-webkit-outer-spin-button,
+.menu-field-input[type="number"]::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+.menu-field-input::placeholder {
+  color: var(--subtle);
+  font-weight: 400;
+  opacity: 0.74;
+}
+
+.menu-select__chevron {
+  flex: 0 0 auto;
+  color: var(--muted);
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.menu-select__chevron--open {
+  transform: rotate(180deg);
+}
+
+.menu-select__menu {
+  box-sizing: border-box;
+  position: absolute;
+  z-index: 1000;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  width: 100%;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l2);
+  background: linear-gradient(180deg, rgba(91, 33, 182, 0.045), rgba(91, 33, 182, 0.025)), var(--surface);
+  box-shadow: var(--shadow);
+  transform-origin: top center;
+  animation: menuSelectOpen 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
+  max-height: min(calc(12px + 34px * var(--menu-select-max-items, 8)), calc(100vh - 160px));
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(91, 33, 182, 0.28) transparent;
+  will-change: opacity, transform, clip-path;
+}
+
+.menu-select__menu--closing {
+  pointer-events: none;
+  animation: menuSelectClose 0.16s cubic-bezier(0.45, 0, 0.55, 1) both;
+}
+
+.menu-select__menu--top {
+  top: auto;
+  bottom: calc(100% + 6px);
+  transform-origin: bottom center;
+  animation-name: menuSelectOpenUp;
+}
+
+.menu-select__menu--top.menu-select__menu--closing {
+  animation-name: menuSelectCloseUp;
+}
+
+.menu-select__menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.menu-select__menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.menu-select__menu::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(91, 33, 182, 0.22);
+}
+
+.menu-select__menu::-webkit-scrollbar-thumb:hover {
+  background: rgba(91, 33, 182, 0.34);
+}
+
+.menu-select__item {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
+}
+
+.menu-select__item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  line-height: 1.45;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.menu-select__item-description {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.menu-select--compact .menu-select__item {
+  padding-right: 6px;
+  padding-left: 6px;
+}
+
+.menu-select__hover {
+  position: absolute;
+  z-index: 0;
+  left: 6px;
+  right: 6px;
+  top: 6px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--blue-soft);
+  opacity: 1;
+  pointer-events: none;
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), height 0.18s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.12s ease;
+  will-change: transform, height;
+}
+
+.menu-select__hover--hidden {
+  opacity: 0;
+}
+
+.menu-select__item--active {
+  background: transparent;
+  color: var(--blue);
+  font-weight: 700;
+}
+
+@keyframes menuSelectOpen {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scaleY(0.96);
+    clip-path: inset(0 0 100% 0 round var(--radius-l2));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+    clip-path: inset(0 0 0 0 round var(--radius-l2));
+  }
+}
+
+@keyframes menuSelectClose {
+  from {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+    clip-path: inset(0 0 0 0 round var(--radius-l2));
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px) scaleY(0.97);
+    clip-path: inset(0 0 100% 0 round var(--radius-l2));
+  }
+}
+
+@keyframes menuSelectOpenUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scaleY(0.96);
+    clip-path: inset(100% 0 0 0 round var(--radius-l2));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+    clip-path: inset(0 0 0 0 round var(--radius-l2));
+  }
+}
+
+@keyframes menuSelectCloseUp {
+  from {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+    clip-path: inset(0 0 0 0 round var(--radius-l2));
+  }
+  to {
+    opacity: 0;
+    transform: translateY(4px) scaleY(0.97);
+    clip-path: inset(100% 0 0 0 round var(--radius-l2));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-select__chevron,
+  .menu-select__hover,
+  .menu-select__item,
+  .menu-select__trigger,
+  .menu-field-input {
+    transition: none;
+  }
+
+  .menu-select__menu,
+  .menu-select__menu--closing {
+    animation-duration: 1ms;
+  }
+}

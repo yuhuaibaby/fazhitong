@@ -1,0 +1,263 @@
+.data-table-wrap {
+  overflow-x: auto;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.data-table {
+  width: 100%;
+  min-width: 1200px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 14px;
+  table-layout: auto;
+}
+
+.data-table th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  height: 42px;
+  padding: 0 14px;
+  background: var(--surface-soft);
+  border-bottom: 1px solid var(--line);
+  color: #475569;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.data-table td {
+  min-height: 52px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+  color: var(--text);
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 250px;
+}
+
+.data-table th.data-table__identifier-col,
+.data-table td.data-table__identifier-col {
+  width: max-content;
+  min-width: max-content;
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+.data-table__cell-multiline-frame {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.data-table__cell-layout-sizer {
+  height: 0;
+  max-height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.data-table__cell-layout-sizer > * {
+  white-space: nowrap !important;
+}
+
+.data-table__cell-multiline {
+  display: -webkit-box;
+  -webkit-line-clamp: var(--line-clamp, 3);
+  -webkit-box-orient: vertical;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  white-space: pre-line;
+  word-break: break-all;
+  line-height: 1.45;
+  max-height: calc(1.45em * var(--line-clamp, 3));
+  text-overflow: ellipsis;
+}
+
+.data-table__cell-multiline > * {
+  white-space: inherit !important;
+}
+
+.environment-accounts-modal {
+  height: 100%;
+  overflow: hidden;
+}
+
+.environment-accounts-table {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.environment-accounts-table .data-table-wrap {
+  min-height: 0;
+  overflow: auto;
+}
+
+.environment-accounts-table .data-table {
+  min-width: 1040px;
+  table-layout: fixed;
+}
+
+.environment-accounts-table .data-table th,
+.environment-accounts-table .data-table td {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+/* 账号管理：管理员开关按钮（用 button 实现，确保可点击） */
+.admin-toggle {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  border-radius: 999px;
+  border: none;
+  background: var(--line, #d1d5db);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.admin-toggle--on {
+  background: var(--blue, #2563eb);
+}
+.admin-toggle__knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+.admin-toggle--on .admin-toggle__knob {
+  transform: translateX(16px);
+}
+
+
+.align-left {
+  text-align: left;
+}
+
+.align-center {
+  text-align: center;
+}
+
+.align-right {
+  text-align: right;
+}
+
+.table-title {
+  display: grid;
+  gap: 3px;
+}
+
+.table-title span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* ── Sticky right column ── */
+.sticky-right {
+  position: sticky;
+  right: 0;
+  z-index: 4;
+  background: var(--surface);
+}
+
+thead .sticky-right {
+  background: var(--surface-soft);
+  z-index: 5;
+}
+
+.sticky-right::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -8px;
+  width: 8px;
+  height: 100%;
+  background: linear-gradient(to right, transparent, rgba(0,0,0,0.04));
+  pointer-events: none;
+}
+
+thead .sticky-right::before {
+  background: linear-gradient(to right, transparent, rgba(0,0,0,0.03));
+}
+
+/* ── Sticky left column ── */
+.sticky-left {
+  position: sticky;
+  left: 0;
+  z-index: 4;
+  background: var(--surface);
+}
+
+thead .sticky-left {
+  background: var(--surface-soft);
+  z-index: 5;
+}
+
+.sticky-left::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -8px;
+  width: 8px;
+  height: 100%;
+  background: linear-gradient(to left, transparent, rgba(0,0,0,0.04));
+  pointer-events: none;
+}
+
+thead .sticky-left::after {
+  background: linear-gradient(to left, transparent, rgba(0,0,0,0.03));
+}
+
+/* ── Legacy: sticky last column fallback ── */
+.data-table th:last-child:not(.sticky-right),
+.data-table td:last-child:not(.sticky-right) {
+  /* no-op, just avoid conflict with explicit sticky classes */
+}
+
+/* ── Visual separator for sticky column border ── */
+.sticky-right {
+  border-left: 1px solid var(--line);
+}
+
+.sticky-left {
+  border-right: 1px solid var(--line);
+}
+
+@media (max-width: 560px) {
+  .data-table-wrap {
+    margin: 0 -14px;
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+
+  .data-table {
+    min-width: 600px;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+}

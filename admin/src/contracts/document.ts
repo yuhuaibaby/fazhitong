@@ -1,0 +1,64 @@
+// Document Types
+
+export type RiskLevel = "高" | "中" | "低";
+export type TargetPlatform = "PC" | "APP";
+
+export interface FileAsset {
+  id: string;
+  projectId: string;
+  name: string;
+  fileType: string;
+  size: string;
+  storagePath: string;
+  parseStatus: string;
+  parseError: string;
+  uploadedAt: string;
+}
+
+export interface Requirement {
+  id: string;
+  reqId: string;
+  projectId: string;
+  module: string;
+  feature: string;
+  source: string;
+  risk: RiskLevel;
+  targetPlatform: TargetPlatform;
+  rule: string;
+  question: string;
+  confirmed: boolean;
+  clarificationStatus?: string;
+  clarificationAnswer?: string;
+  reviewStatus: string;
+  validityStatus?: string;
+  invalidReason?: string;
+  invalidatedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RequirementUpdate {
+  rule?: string;
+  question?: string;
+  targetPlatform?: TargetPlatform;
+  confirmed?: boolean;
+  clarificationStatus?: string;
+  clarificationAnswer?: string;
+  reviewStatus?: string;
+}
+
+export interface DocumentParseResult {
+  requirements: ParsedRequirement[];
+  totalCount: number;
+  moduleCount: number;
+}
+
+export interface ParsedRequirement {
+  module: string;
+  feature: string;
+  source: string;
+  risk: string;
+  targetPlatform: TargetPlatform;
+  rule: string;
+  question: string;
+}

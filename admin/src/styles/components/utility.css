@@ -1,0 +1,106 @@
+/* ─── Utility ─── */
+
+.text-muted {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.text-blue {
+  color: var(--blue);
+}
+
+.text-green {
+  color: var(--green);
+}
+
+.text-red {
+  color: var(--red);
+}
+
+.inline-icon-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.visually-hidden {
+  display: none;
+}
+
+.section-actions-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.section-actions-row {
+  display: flex;
+  gap: 8px;
+}
+
+.inline-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.environment-more-menu {
+  position: fixed;
+  z-index: 1000;
+  width: 118px;
+  max-width: calc(100vw - 24px);
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l2);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  animation: menuSlideIn 0.16s ease;
+}
+
+.environment-more-menu__item {
+  width: 100%;
+  min-height: 32px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
+}
+
+.environment-more-menu__item:hover {
+  background: var(--blue-soft);
+}
+
+.environment-more-menu__item:disabled {
+  cursor: not-allowed;
+  color: var(--muted);
+  background: transparent;
+}
+
+.table-link {
+  text-align: left;
+  padding: 0;
+  min-height: auto;
+}
+
+.editable-cell {
+  cursor: pointer;
+  border-bottom: 1px dashed var(--line);
+  padding-bottom: 1px;
+  transition: border-color 0.15s;
+}
+
+.editable-cell:hover {
+  border-color: var(--blue);
+  color: var(--text);
+}

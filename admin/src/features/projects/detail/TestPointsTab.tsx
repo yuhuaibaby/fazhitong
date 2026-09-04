@@ -1,0 +1,262 @@
+import { useMemo, useState } from "react";
+import { CheckCircle2, Download, Loader2, WandSparkles } from "lucide-react";
+import { toast } from "sonner";
+import { useStore } from "../../../app/store";
+import { testPointsApi } from "../../../api/client";
+import { useProjectData } from "../useProjectData";
+import { useConfigError } from "../../../shared/hooks/useConfigError";
+import { startGenerateTestPoints } from "../../../shared/hooks/aiTaskManager";
+import { useUnsavedChanges } from "../../../shared/hooks/useUnsavedChanges";
+import { DataTable } from "../../../shared/components/DataTable";
+import { SectionHeader } from "../../../shared/components/SectionHeader";
+import { StatusPill } from "../../../shared/components/StatusPill";
+import { ConfirmDialog } from "../../../shared/components/ConfirmDialog";
+import { Modal } from "../../../shared/components/Modal";
+import { MenuSelect } from "../../../shared/components/MenuSelect";
+import { formatProjectTime as formatTime, priorityTone, reviewTone } from "./projectDetail.config";
+import { useProjectMutationLock } from "./ProjectMutationLockContext";
+import type { TargetPlatform } from "../../../shared/types/platform";
+
+function generationButtonLabel(stage?: string) {
+  switch (stage) {
+    case "checking": return "检查中...";
+    case "creating": return "启动中...";
+    case "preparing": return "准备中...";
+    case "validating": return "校验中...";
+    case "saving": return "保存中...";
+    default: return "生成中...";
+  }
+}
+
+// ═══════════════════════════════════════
+// 测试点（AI 生成 + 评审）
+// ═══════════════════════════════════════
+
+export function TestPointsTab({ projectId }: { projectId: string }) {
+  const { project, testPoints, files, requirements, refresh, refreshTestPoints, loading, initialLoading } = useProjectData(projectId);
+  const { state, dispatch } = useStore();
+  const { mutationLocked, mutationLockMessage } = useProjectMutationLock();
+  const taskKey = `${projectId}:测试点生成`;
+  const generating = useMemo(() => state.activeAITasks.includes(taskKey), [state.activeAITasks, taskKey]);
+  const lockedByOtherTask = mutationLocked && !generating;
+  const generationProgress = state.aiTaskProgress[taskKey];
+  const { showConfigError, dialog: configErrorDialog } = useConfigError();
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false);
+  const [viewTP, setViewTP] = useState<typeof testPoints[0] | null>(null);
+  const [editTP, setEditTP] = useState<typeof testPoints[0] | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDesc, setEditDesc] = useState("");
+  const [editTargetPlatform, setEditTargetPlatform] = useState<TargetPlatform>("PC");
+  const tpDirty = useUnsavedChanges("测试点");
+
+  const hasPrerequisite = requirements.length > 0;
+  const invalidReqCount = requirements.filter((r) => (r as any).validityStatus === "已失效").length;
+  const unreviewedReqCount = requirements.filter((r) => (r as any).reviewStatus !== "已通过").length;
+  const progressMeta = useMemo(() => {
+    if (!generating) return <>共 <strong>{testPoints.length}</strong> 个测试点</>;
+    return <>{generationProgress?.message || "测试点生成任务正在执行"}</>;
+  }, [generating, generationProgress?.message, testPoints.length]);
+
+  const startGeneration = async () => {
+    setShowRegenerateConfirm(false);
+    await startGenerateTestPoints(projectId);
+    await refresh();
+  };
+
+  const handleGenerate = async () => {
+    if (lockedByOtherTask) { toast.warning(mutationLockMessage); return; }
+    if (!hasPrerequisite) { toast.warning("请先在「需求列表」页面完成需求解析"); return; }
+    if (invalidReqCount > 0) { toast.warning(`还有 ${invalidReqCount} 条需求已失效，请先重新解析需求`); return; }
+    if (unreviewedReqCount > 0) { toast.warning(`还有 ${unreviewedReqCount} 条需求未评审通过，请先完成需求列表评审`); return; }
+    if (testPoints.length > 0) { setShowRegenerateConfirm(true); return; }
+    await startGeneration();
+  };
+  const isInvalid = (tp: any) => tp.validityStatus === "已失效" || tp.reviewStatus === "已作废";
+  const reviewableTestPoints = testPoints.filter((tp) => !isInvalid(tp));
+  const allSelected = reviewableTestPoints.length > 0 && reviewableTestPoints.every((tp) => selectedIds.has(tp.id));
+  const hasInvalid = testPoints.some((tp) => tp.validityStatus === "已失效");
+  const toggleSelectAll = () => setSelectedIds(allSelected ? new Set() : new Set(reviewableTestPoints.map((tp) => tp.id)));
+  const toggleSelect = (id: string) => setSelectedIds((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  const toggleReview = async (tp: any) => {
+    if (lockedByOtherTask) { toast.warning(mutationLockMessage); return; }
+    if (isInvalid(tp)) { toast.warning("已失效的测试点不能修改评审状态，请重新生成测试点"); return; }
+    const newStatus = tp.reviewStatus === "已通过" ? "待评审" : "已通过";
+    try { await testPointsApi.update(tp.id, { reviewStatus: newStatus } as any); } catch {}
+    dispatch({ type: "UPDATE_TEST_POINT", payload: { ...tp, reviewStatus: newStatus } });
+    await refreshTestPoints();
+  };
+  const [showBatchApproveConfirm, setShowBatchApproveConfirm] = useState(false);
+  const batchApprove = async () => {
+    if (lockedByOtherTask) { toast.warning(mutationLockMessage); return; }
+    const selected = testPoints.filter((tp) => selectedIds.has(tp.id));
+    const invalid = selected.filter(isInvalid);
+    const reviewable = selected.filter((tp) => !isInvalid(tp) && tp.reviewStatus !== "已通过");
+
+    if (reviewable.length === 0) {
+      if (invalid.length > 0) {
+        toast.warning(`选中的 ${selectedIds.size} 个测试点均已失效，无法再次评审。数据失效后需重新生成测试点`);
+      } else {
+        toast.info("选中的测试点已是评审通过状态，无需重复评审");
+      }
+      setSelectedIds(new Set());
+      return;
+    }
+
+    let passed = 0;
+    for (const tp of reviewable) {
+      try { await testPointsApi.update(tp.id, { reviewStatus: "已通过" } as any); } catch {}
+      dispatch({ type: "UPDATE_TEST_POINT", payload: { ...tp, reviewStatus: "已通过" } });
+      passed += 1;
+    }
+    if (invalid.length > 0) {
+      toast.success(`已通过 ${passed} 个测试点；其中 ${invalid.length} 个已失效被自动跳过`);
+    } else {
+      toast.success(`已通过 ${passed} 个测试点`);
+    }
+    setSelectedIds(new Set());
+    await refreshTestPoints();
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editTP) return;
+    try {
+      const updatedTP = await testPointsApi.update(editTP.id, { title: editTitle, description: editDesc, targetPlatform: editTargetPlatform } as any);
+      dispatch({ type: "UPDATE_TEST_POINT", payload: updatedTP });
+      await refreshTestPoints();
+      toast.success("保存成功");
+      tpDirty.markClean();
+      setEditTP(null);
+    } catch {
+      toast.error("保存失败");
+    }
+  };
+
+  const handleExport = async () => {
+    if (testPoints.length === 0) {
+      toast.warning("暂无测试点，请先生成测试点");
+      return;
+    }
+    try {
+      const blob = await testPointsApi.export(projectId);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${project?.name || "未命名项目"}-测试点.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success(`已导出 ${testPoints.length} 个测试点`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "导出失败");
+    }
+  };
+
+  return (
+    <div className="page-stack page-stack--spaced page-stack--fill">
+      <SectionHeader title="测试点生成" description="AI 从文档中提取测试点，支持评审。" meta={progressMeta}
+        actions={<>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
+            <div style={{ display: "flex", gap: 8 }}>
+              {selectedIds.size > 0 && <button className="ghost-button" type="button" onClick={() => setShowBatchApproveConfirm(true)} disabled={lockedByOtherTask} title={lockedByOtherTask ? mutationLockMessage : undefined}><CheckCircle2 size={13} /> 评审通过（{selectedIds.size}）</button>}
+              <button className="ghost-button" type="button" onClick={handleExport} disabled={generating}><Download size={13} /> 导出 Excel</button>
+              <button className="primary-button" type="button" onClick={handleGenerate} disabled={generating || lockedByOtherTask} title={lockedByOtherTask ? mutationLockMessage : undefined}>{generating ? <><Loader2 size={13} className="animate-spin" /> {generationButtonLabel(generationProgress?.stage)}</> : <><WandSparkles size={13} /> 生成测试点</>}</button>
+            </div>
+          </div>
+        </>} />
+      <section className="work-panel">
+        {initialLoading && testPoints.length === 0 ? <div className="empty-state"><Loader2 size={20} className="animate-spin" style={{ color: "var(--muted)" }} /><p style={{ marginTop: 8, color: "var(--muted)" }}>加载中...</p></div> : testPoints.length === 0 ? <div className="empty-state"><p>暂无测试点</p></div> : (
+          <DataTable rows={testPoints} getRowKey={(r) => r.id} columns={[
+            { key: "select", label: <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} disabled={reviewableTestPoints.length === 0} />, width: "40px", sticky: "left" as const, render: (r) => {
+              const invalid = isInvalid(r);
+              return <input type="checkbox" checked={selectedIds.has(r.id)} onChange={() => toggleSelect(r.id)} disabled={invalid} title={invalid ? "已失效测试点不可评审" : undefined} />;
+            } },
+            { key: "pointCode", label: "测试项标识", render: (r) => r.pointCode || <span style={{ color: "var(--muted)" }}>-</span> },
+            { key: "module", label: "模块", render: (r) => r.module },
+            { key: "type", label: "类型", render: (r) => r.type },
+            { key: "title", label: "测试点", align: "left", lineClamp: 3, render: (r) => r.title },
+            { key: "targetPlatform", label: "测试端", width: "72px", align: "center", render: (r) => r.targetPlatform || "PC" },
+            { key: "priority", label: "优先级", align: "center", render: (r) => <StatusPill tone={priorityTone(r.priority)}>{r.priority}</StatusPill> },
+            { key: "reviewStatus", label: "评审", align: "center", render: (r) => <button type="button" className="text-button" onClick={() => toggleReview(r)}><StatusPill tone={reviewTone(r.reviewStatus)}>{r.reviewStatus}</StatusPill></button> },
+            { key: "validityStatus", label: "数据状态", align: "center", render: (r) => <StatusPill tone={r.validityStatus === "已失效" ? "amber" : "green"}>{r.validityStatus || "有效"}</StatusPill> },
+            ...(hasInvalid ? [{ key: "invalidReason", label: "失效原因", align: "left" as const, width: "14%", lineClamp: 2, render: (r: any) => (r.validityStatus === "已失效" && r.invalidReason) ? <span title={r.invalidReason}>{r.invalidReason}</span> : null }] : []),
+            { key: "createdAt", label: "生成时间", render: (r) => formatTime(r.createdAt) },
+            { key: "updatedAt", label: "更新时间", render: (r) => formatTime(r.updatedAt) },
+            { key: "actions", label: "操作", width: "120px", sticky: "right" as const, align: "center", render: (r) => (
+              <div className="inline-actions">
+                <button className="text-button" type="button" onClick={() => setViewTP(r)}>查看</button>
+                <button className="text-button" type="button" onClick={() => { setEditTP(r); setEditTitle(r.title); setEditDesc(r.description); setEditTargetPlatform((r.targetPlatform || "PC") as TargetPlatform); }}>编辑</button>
+              </div>
+            )},
+          ]} />
+        )}
+      </section>
+
+      {/* 查看测试点弹窗 */}
+      <Modal open={!!viewTP} onClose={() => setViewTP(null)} title="测试点详情" width={640}>
+        {viewTP && (
+          <div className="detail-grid">
+            <div className="detail-row"><span className="detail-label">测试项标识</span><span>{viewTP.pointCode || "-"}</span></div>
+            <div className="detail-row"><span className="detail-label">模块</span><span>{viewTP.module}</span></div>
+            <div className="detail-row"><span className="detail-label">类型</span><span>{viewTP.type}</span></div>
+            <div className="detail-row detail-row--full"><span className="detail-label">测试点</span><span>{viewTP.title}</span></div>
+            <div className="detail-row"><span className="detail-label">测试端</span><span>{viewTP.targetPlatform || "PC"}</span></div>
+            <div className="detail-row"><span className="detail-label">优先级</span><StatusPill tone={priorityTone(viewTP.priority)}>{viewTP.priority}</StatusPill></div>
+            <div className="detail-row"><span className="detail-label">评审状态</span><StatusPill tone={reviewTone(viewTP.reviewStatus)}>{viewTP.reviewStatus}</StatusPill></div>
+            <div className="detail-row detail-row--full"><span className="detail-label">描述</span><pre className="detail-pre">{viewTP.description || "无"}</pre></div>
+            <div className="detail-row"><span className="detail-label">生成时间</span><span>{formatTime(viewTP.createdAt)}</span></div>
+            <div className="detail-row"><span className="detail-label">更新时间</span><span>{formatTime(viewTP.updatedAt)}</span></div>
+          </div>
+        )}
+      </Modal>
+
+      {/* 编辑测试点弹窗 */}
+      <Modal open={!!editTP} onClose={() => tpDirty.requestClose(() => setEditTP(null))} title="编辑测试点" width={640}
+        footer={<>
+          <button className="ghost-button" type="button" onClick={() => tpDirty.requestClose(() => setEditTP(null))}>取消</button>
+          <button className="primary-button" type="button" onClick={handleSaveEdit}>保存</button>
+        </>}
+      >
+        {editTP && (
+          <div className="detail-grid">
+            <div className="detail-row"><span className="detail-label">测试项标识</span><span>{editTP.pointCode || "-"}</span></div>
+            <div className="detail-row"><span className="detail-label">模块</span><span>{editTP.module}</span></div>
+            <div className="detail-row"><span className="detail-label">类型</span><span>{editTP.type}</span></div>
+            <div className="detail-row"><span className="detail-label">测试端</span><MenuSelect className="detail-row__menu-select" value={editTargetPlatform} options={[{ value: "PC", label: "PC" }, { value: "APP", label: "APP" }]} onChange={(value) => { setEditTargetPlatform(value); tpDirty.markDirty(); }} /></div>
+            <div className="detail-row"><span className="detail-label">优先级</span><StatusPill tone={priorityTone(editTP.priority)}>{editTP.priority}</StatusPill></div>
+            <div className="detail-row"><span className="detail-label">评审状态</span><StatusPill tone={reviewTone(editTP.reviewStatus)}>{editTP.reviewStatus}</StatusPill></div>
+            <div className="detail-row detail-row--full"><span className="detail-label">测试点</span><input className="form-input" style={{ flex: 1 }} value={editTitle} onChange={(e) => { setEditTitle(e.target.value); tpDirty.markDirty(); }} /></div>
+            <div className="detail-row detail-row--full"><span className="detail-label">描述</span><textarea className="form-textarea" style={{ flex: 1 }} rows={6} value={editDesc} onChange={(e) => { setEditDesc(e.target.value); tpDirty.markDirty(); }} /></div>
+
+          </div>
+        )}
+      </Modal>
+
+      <ConfirmDialog
+        open={showRegenerateConfirm}
+        title="重新生成测试点"
+        message={`当前已有 ${testPoints.length} 个测试点，重新生成会在新测试点生成并校验通过后整体替换当前测试点及下游数据；失败不会写入新测试点。`}
+        confirmLabel="重新生成"
+        danger={false}
+        confirmLoading={generating}
+        onConfirm={startGeneration}
+        onCancel={() => setShowRegenerateConfirm(false)}
+      />
+      <ConfirmDialog open={showBatchApproveConfirm} title="批量评审通过" message={(() => {
+        const selected = testPoints.filter((tp) => selectedIds.has(tp.id));
+        const invalidCount = selected.filter(isInvalid).length;
+        if (invalidCount === selected.length) {
+          return `选中的 ${selectedIds.size} 个测试点均已失效，无法再次评审。数据失效后需重新生成测试点`;
+        }
+        if (invalidCount > 0) {
+          return `选中的 ${selectedIds.size} 个测试点中有 ${invalidCount} 个已失效，将被自动跳过，仅评审其余 ${selectedIds.size - invalidCount} 个。是否继续？`;
+        }
+        return `确定将选中的 ${selectedIds.size} 个测试点标记为评审通过？`;
+      })()} confirmLabel="确认通过" onConfirm={() => { setShowBatchApproveConfirm(false); batchApprove(); }} onCancel={() => setShowBatchApproveConfirm(false)} />
+      {configErrorDialog}
+      {tpDirty.confirmDialog}
+
+    </div>
+  );
+}

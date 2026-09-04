@@ -1,0 +1,175 @@
+.primary-button,
+.ghost-button,
+.text-button,
+.icon-button {
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.primary-button,
+.ghost-button {
+  min-height: 27px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  font-weight: 600;
+  font-size: 12px;
+  gap: 6px;
+}
+
+.primary-button {
+  color: #ffffff;
+  background: var(--blue);
+  box-shadow: 0 1px 3px rgba(91, 33, 182, 0.3);
+}
+
+.primary-button:hover {
+  background: #4c1d95;
+  box-shadow: 0 2px 8px rgba(91, 33, 182, 0.4);
+}
+
+.primary-button:active {
+  transform: scale(0.97);
+  box-shadow: 0 1px 2px rgba(91, 33, 182, 0.3);
+}
+
+.primary-button:disabled,
+.ghost-button:disabled,
+.text-button:disabled,
+.icon-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+  transform: none;
+  box-shadow: none;
+}
+
+.ghost-button {
+  color: var(--text);
+  background: rgba(91, 33, 182, 0.06);
+  border-color: transparent;
+}
+
+.ghost-button:hover {
+  background: rgba(91, 33, 182, 0.10);
+}
+
+.ghost-button:active {
+  transform: scale(0.97);
+  background: rgba(91, 33, 182, 0.14);
+}
+
+.ghost-button--danger {
+  color: var(--red);
+  background: var(--red-soft);
+}
+
+.ghost-button--danger:hover {
+  background: #ffe0de;
+}
+
+.ghost-button--danger:active {
+  background: #ffd0cc;
+}
+
+.text-button {
+  min-height: 32px;
+  border: 0;
+  background: transparent;
+  color: var(--blue);
+  font-weight: 600;
+  padding: 0 8px;
+}
+
+.text-button:hover {
+  background: var(--blue-soft);
+}
+
+.text-button:active {
+  transform: scale(0.97);
+}
+
+.icon-button {
+  width: 38px;
+  height: 38px;
+  border: 1px solid transparent;
+  background: rgba(91, 33, 182, 0.06);
+  color: var(--text);
+}
+
+.icon-button:hover {
+  background: rgba(91, 33, 182, 0.10);
+}
+
+.icon-button:active {
+  transform: scale(0.93);
+  background: rgba(91, 33, 182, 0.14);
+}
+
+/* 工具栏按钮（筛选区域使用，高度与筛选框一致） */
+.toolbar-button {
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  font-weight: 600;
+  font-size: 12px;
+  gap: 6px;
+}
+
+.toolbar-primary-button {
+  color: #ffffff;
+  background: var(--blue);
+  box-shadow: 0 1px 3px rgba(91, 33, 182, 0.3);
+}
+
+.toolbar-primary-button:hover {
+  background: #4c1d95;
+}
+
+.toolbar-ghost-button {
+  color: var(--text);
+  background: rgba(91, 33, 182, 0.06);
+  border-color: transparent;
+}
+
+.toolbar-ghost-button:hover {
+  background: rgba(91, 33, 182, 0.10);
+}
+
+@media (max-width: 560px) {
+  .primary-button,
+  .ghost-button {
+    width: 100%;
+  }
+}
+
+/* 测试按钮状态 */
+.test-button {
+  width: 5em;
+  justify-content: center;
+  position: relative;
+}
+
+.test-button.testing {
+  color: var(--blue);
+  cursor: not-allowed;
+}
+
+.test-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+
+.test-loading svg {
+  width: 12px;
+  height: 12px;
+}

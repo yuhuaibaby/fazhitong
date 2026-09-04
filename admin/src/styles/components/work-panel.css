@@ -1,0 +1,28 @@
+.two-column-layout {
+  display: grid;
+  grid-template-columns: 1fr calc((100% - 42px) / 4);
+  gap: var(--sp-sm);
+  align-items: stretch;
+}
+
+.work-panel {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+@media (max-width: 1180px) {
+  .two-column-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .work-panel {
+    padding: 14px;
+  }
+}
